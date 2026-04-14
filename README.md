@@ -60,39 +60,7 @@ anime-recommender/
 ```
 
 
-## 🌐 Deploy to GitHub Pages
 
-1. **Create a GitHub repo** named `anime-recommender`
-2. **Push your code:**
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit - AniRec anime recommender"
-   git branch -M main
-   git remote add origin https://github.com/<your-username>/anime-recommender.git
-   git push -u origin main
-   ```
-3. **Enable GitHub Pages:**
-   - Go to repo **Settings** → **Pages**
-   - Source: **Deploy from a branch**
-   - Branch: **main** / **/ (root)**
-   - Click **Save**
-4. **Wait ~2 minutes**, then visit:
-   `https://<your-username>.github.io/anime-recommender/`
-
-## ⚡ Optional: Deploy Cloudflare Worker (Better Backend)
-
-The default setup uses a free CORS proxy (`corsproxy.io`). For better reliability, deploy your own backend:
-
-1. Go to [workers.cloudflare.com](https://workers.cloudflare.com/) (free account)
-2. Click **Create a Worker**
-3. Paste the contents of `worker/index.js` into the editor
-4. Click **Deploy**
-5. Copy your worker URL (e.g., `https://anirec-proxy.your-name.workers.dev`)
-6. Update `js/api.js`:
-   ```javascript
-   const API_URL = 'https://anirec-proxy.your-name.workers.dev';
-   ```
 
 ## 🧠 How the Recommendation Algorithm Works
 
