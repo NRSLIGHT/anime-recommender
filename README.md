@@ -59,33 +59,6 @@ anime-recommender/
 └── README.md               # You are here!
 ```
 
-## 🛠️ Setup & Run Locally
-
-### 1. Clone the repo
-
-```bash
-git clone https://github.com/<your-username>/anime-recommender.git
-cd anime-recommender
-```
-
-### 2. Start a local server
-
-You can use any static file server. Here are some options:
-
-```bash
-# Option A: Python (Python 3)
-python -m http.server 8000
-
-# Option B: Node.js (npx)
-npx serve .
-
-# Option C: VS Code Live Server extension
-# Right-click index.html → "Open with Live Server"
-```
-
-### 3. Open in browser
-
-Navigate to `http://localhost:8000` (or whatever port your server uses).
 
 ## 🌐 Deploy to GitHub Pages
 

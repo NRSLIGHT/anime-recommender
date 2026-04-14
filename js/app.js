@@ -47,6 +47,7 @@ const App = (() => {
       trendingSection: document.getElementById('trending-section'),
       trendingGrid: document.getElementById('trending-grid'),
       profileTags: document.getElementById('profile-tags'),
+      genreSelector: document.getElementById('genre-selector'),
     };
   }
 
@@ -109,6 +110,56 @@ const App = (() => {
       els.refreshBtn.addEventListener('click', () => {
         loadRecommendations();
       });
+    }
+
+    // Genre selector chips
+    if (els.genreSelector) {
+      els.genreSelector.querySelectorAll('.genre-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          // Toggle active state
+          const wasActive = chip.classList.contains('active');
+          els.genreSelector.querySelectorAll('.genre-chip').forEach(c => c.classList.remove('active'));
+          if (!wasActive) {
+            chip.classList.add('active');
+            browseByGenre(chip.dataset.genre);
+          } else {
+            // Deselect — go back to recommendations
+            loadRecommendations();
+          }
+        });
+      });
+    }
+  }
+
+  /* ---------- Genre Browse ---------- */
+
+  async function browseByGenre(genre) {
+    els.recsGrid.style.display = 'none';
+    els.recsEmpty.style.display = 'none';
+    els.recsLoading.style.display = 'flex';
+    if (els.recsMessage) els.recsMessage.textContent = `Browsing ${genre} anime...`;
+    if (els.profileTags) els.profileTags.innerHTML = '';
+
+    try {
+      const watchedIds = RecommendEngine.getWatchList().map(a => a.id);
+      const result = await AniListAPI.getAnimeByGenres([genre], [], watchedIds, 1, 30);
+
+      els.recsLoading.style.display = 'none';
+
+      if (!result.media || result.media.length === 0) {
+        els.recsEmpty.style.display = 'block';
+        return;
+      }
+
+      const scored = result.media.map(a => ({ ...a, matchScore: 0 }));
+      currentRecommendations = scored;
+      renderRecommendations(scored, 'browse');
+      updateStats();
+
+    } catch (error) {
+      console.error('Genre browse error:', error);
+      els.recsLoading.style.display = 'none';
+      els.recsEmpty.style.display = 'block';
     }
   }
 
@@ -583,10 +634,31 @@ const App = (() => {
         <div class="modal-actions">
           ${isWatched
             ? `<button class="btn-danger" onclick="App.removeAnime(${anime.id}); App.closeModal();">✕ Remove from List</button>`
-            : `<button class="btn-primary" onclick="App.addFromSearch(${anime.id}); App.closeModal();">+ Add to Watched</button>`
+            : `<button class="btn-primary" onclick="App.addFromSearch(${anime.id}); App.closeModal();">+ Add to Watch List</button>`
           }
           ${trailerHtml}
           <a href="https://anilist.co/anime/${anime.id}" target="_blank" class="btn-outline">View on AniList ↗</a>
+        </div>
+
+        <!-- Watch Now Streaming Links -->
+        <div style="margin-top:var(--space-xl)">
+          <h3 style="font-family:var(--font-display);font-size:1.1rem;margin-bottom:var(--space-md);">
+            📺 Watch Now
+          </h3>
+          <div class="watch-links">
+            <a href="https://www.crunchyroll.com/search?q=${encodeURIComponent(anime.title?.romaji || title)}" target="_blank" class="watch-link-btn crunchyroll">
+              🍊 Crunchyroll
+            </a>
+            <a href="https://aniwatchtv.to/search?keyword=${encodeURIComponent(anime.title?.romaji || title)}" target="_blank" class="watch-link-btn aniwatch">
+              🌐 AniWatch
+            </a>
+            <a href="https://myanimelist.net/anime.php?q=${encodeURIComponent(anime.title?.romaji || title)}&cat=anime" target="_blank" class="watch-link-btn">
+              📋 MyAnimeList
+            </a>
+            <a href="https://www.google.com/search?q=watch+${encodeURIComponent(title)}+anime+online" target="_blank" class="watch-link-btn">
+              🔍 Search Online
+            </a>
+          </div>
         </div>
 
         ${recsHtml}
@@ -665,6 +737,7 @@ const App = (() => {
     openAnimeDetail,
     closeModal,
     loadRecommendations,
+    browseByGenre,
   };
 })();
 

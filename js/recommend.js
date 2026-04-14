@@ -157,7 +157,7 @@ const RecommendEngine = (() => {
     
     if (!profile || profile.totalWatched === 0) {
       // Cold start: return trending anime
-      const trending = await AniListAPI.getTrending(1, 20);
+      const trending = await AniListAPI.getTrending(1, 30);
       return {
         anime: trending.media.map(a => ({ ...a, matchScore: 0 })),
         type: 'trending',
@@ -178,7 +178,7 @@ const RecommendEngine = (() => {
           topTags,
           profile.watchedIds,
           1,
-          25
+          30
         );
         if (page1 && page1.media) {
           page1.media.forEach(anime => {
@@ -190,7 +190,6 @@ const RecommendEngine = (() => {
         }
       }
 
-      // Query 2: Secondary genres (diversity)
       if (profile.topGenres.length > 2) {
         const secondaryGenres = profile.topGenres.slice(1, 4);
         const page2 = await AniListAPI.getAnimeByGenres(
@@ -198,10 +197,30 @@ const RecommendEngine = (() => {
           [],
           [...profile.watchedIds, ...Array.from(seenIds)],
           1,
-          15
+          20
         );
         if (page2 && page2.media) {
           page2.media.forEach(anime => {
+            if (!seenIds.has(anime.id)) {
+              seenIds.add(anime.id);
+              results.push(anime);
+            }
+          });
+        }
+      }
+
+      // Query 3: Broader exploration with different tag combos
+      if (profile.topTags.length > 3) {
+        const exploreTags = profile.topTags.slice(3, 6);
+        const page3 = await AniListAPI.getAnimeByGenres(
+          profile.topGenres.slice(0, 2),
+          exploreTags,
+          [...profile.watchedIds, ...Array.from(seenIds)],
+          1,
+          15
+        );
+        if (page3 && page3.media) {
+          page3.media.forEach(anime => {
             if (!seenIds.has(anime.id)) {
               seenIds.add(anime.id);
               results.push(anime);
@@ -253,7 +272,7 @@ const RecommendEngine = (() => {
     scored.sort((a, b) => b.matchScore - a.matchScore);
 
     return {
-      anime: scored.slice(0, 24),
+      anime: scored.slice(0, 36),
       type: 'personalized',
       message: `Based on your ${profile.totalWatched} watched anime`,
       profile: {
